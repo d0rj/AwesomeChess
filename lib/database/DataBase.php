@@ -17,7 +17,7 @@ class DataBase
     }
 
 
-    public function Execute(IDataBaseCommand $command): mysqli_result
+    public function Execute(IDataBaseCommand $command)
     {
         return mysqli_query($this->connection, $command->GetStringQuery());
     }
