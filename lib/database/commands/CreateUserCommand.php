@@ -32,7 +32,7 @@ class CreateUserCommand implements IDataBaseCommand
         }
         else 
         {
-            die("Error in create user query construction.");
+            die('Error in create user query construction.');
         }
     }
 }

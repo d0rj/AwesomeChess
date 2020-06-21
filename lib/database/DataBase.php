@@ -13,7 +13,7 @@ class DataBase
         if ($connection !== NULL)
             $this->connection = $connection;
         else
-            $this->connection = mysqli_connect("127.0.0.1", "root", "root", "chess_db");
+            $this->connection = mysqli_connect('127.0.0.1', 'root', 'root', 'chess_db');
     }
 
 
