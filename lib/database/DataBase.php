@@ -5,7 +5,7 @@ require_once __DIR__."/IDataBaseCommand.php";
 
 class DataBase 
 {
-    private $connection;
+    private mysqli $connection;
 
 
     public function __construct($connection = NULL)
@@ -17,7 +17,7 @@ class DataBase
     }
 
 
-    public function Execute(IDataBaseCommand $command)
+    public function Execute(IDataBaseCommand $command): mysqli_result
     {
         return mysqli_query($this->connection, $command->GetStringQuery());
     }
