@@ -4,6 +4,7 @@ require_once __DIR__."/../IRouteHandler.php";
 require_once __DIR__."/../../database/DataBase.php";
 require_once __DIR__."/../../database/commands/GetUsersCommand.php";
 require_once __DIR__."/../../database/commands/CreateUserCommand.php";
+require_once __DIR__."/../../database/commands/UpdateUserCommand.php";
 
 
 class UsersHandler implements IRouteHandler 
@@ -34,7 +35,7 @@ class UsersHandler implements IRouteHandler
         {
             $queryResult = $this->db->Execute(new CreateUserCommand($name, $email, $password));
 
-            if ($queryResult === TRUE) 
+            if ($queryResult === true) 
             {
                 echo json_encode([
                     'errors' => 0,
@@ -61,7 +62,52 @@ class UsersHandler implements IRouteHandler
 
     public function OnPUT(array $args): void 
     {
+        /* TODO: Check access rules */
 
+        $data = file_get_contents('php://input');
+        $data = json_decode($data, true);
+
+        $name = $data['name'];
+        $newName = $data['newName'];
+        $newEmail = $data['newEmail'];
+        $newPassword = $data['newPassword'];
+
+        if (!isset($name)) 
+        {
+            echo json_encode([
+                'errors' => 1,
+                'message' => 'Required argument \'name\' for updating '
+            ]);
+            die();
+        }
+
+        if (!isset($newName) && !isset($newEmail) && !isset($newPassword)) 
+        {
+            echo json_encode([
+                'errors' => 1,
+                'message' => 'At least one property must be changed.'
+            ]);
+            die();
+        }
+
+        /* TODO: Check for correct changes */
+
+        $queryResult = $this->db->Execute(new UpdateUserCommand($name, $newName, $newEmail, $newPassword));
+
+        if ($queryResult === true) 
+        {
+            echo json_encode([
+                'errors' => 0,
+                'message' => 'User updated.'
+            ]);
+        }
+        else 
+        {
+            echo json_encode([
+                'errors' => 1,
+                'message' => 'User not updated. User not found or Error in db query.'
+            ]);
+        }
     }
 
     
