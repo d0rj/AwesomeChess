@@ -7,11 +7,13 @@ class Router
 {
     private array $handlers = [];
 
+
     public function AddRoute(string $route, IRouteHandler &$handler)
     {
        $this->handlers[$route] = $handler;
     }
 
+    
     public function Work(): void 
     {
         header('Content-type: json/application');
