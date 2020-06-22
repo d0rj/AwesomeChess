@@ -20,8 +20,56 @@ class UsersHandler implements IRouteHandler
 
     public function OnGET(array $args): void 
     {
-        $usersList = $this->db->ExecuteGetList(new GetUsersCommand());
-        echo json_encode($usersList);
+        if (count($args) === 0) 
+        {
+            $usersList = $this->db->ExecuteGetList(new GetUsersCommand());
+            echo json_encode($usersList);
+            return;
+        }
+
+        if ($this->paramsIsGetById($args)) 
+        {
+            $user = $this->db->ExecuteGetList(new GetUsersCommand('`id` = '.$args[0]))[0];
+
+            if (!isset($user))
+                echo json_encode([
+                    'errors' => 1,
+                    'message' => 'No user with id '.$args[0]
+                ]);
+            else 
+                echo json_encode($user);
+
+            return;
+        }
+
+        if (count($args) === 1) 
+        {
+            $user = $this->db->ExecuteGetList(new GetUsersCommand('`name` = \''.$args[0].'\''))[0];
+
+            if (!isset($user))
+                echo json_encode([
+                    'errors' => 1,
+                    'message' => 'No user with name \''.$args[0].'\''
+                ]);
+            else 
+                echo json_encode($user);
+
+            return;
+        }
+
+        if ($this->paramsIsGetByRating($args)) 
+        {
+            $users = $this->db->ExecuteGetList(new GetUsersCommand('`rating` = '.$args[1]));
+
+            echo json_encode($users);
+
+            return;
+        }
+
+        echo json_encode([
+            'errors' => 1,
+            'message' => 'Unknown command.'
+        ]);
     }
 
 
@@ -114,5 +162,17 @@ class UsersHandler implements IRouteHandler
     public function OnDELETE(array $args): void 
     {
 
+    }
+
+
+    private function paramsIsGetById(array $args): bool
+    {
+        return count($args) === 1 && is_numeric($args[0]);
+    }
+
+
+    private function paramsIsGetByRating(array $args): bool 
+    {
+        return count($args) === 2 && $args[0] === 'rating' && is_numeric($args[1]);
     }
 }

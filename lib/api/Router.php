@@ -20,8 +20,11 @@ class Router
         
         $q = $_GET['q'];
         $params = explode('/', $q);
-        $method = $_SERVER['REQUEST_METHOD'];
 
-        call_user_func(array($this->handlers[$q], 'On'.$method), $params);
+        $handler = $params[0];
+        $params = array_slice($params, 1);
+
+        $method = $_SERVER['REQUEST_METHOD'];
+        call_user_func(array($this->handlers[$handler], 'On'.$method), $params);
     }
 }

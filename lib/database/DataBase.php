@@ -28,10 +28,11 @@ class DataBase
         $query = $this->Execute($command);
         $result = [];
 
-        while ($element = mysqli_fetch_assoc($query)) 
-        {
-            $result[] = $element;
-        }
+        if ($query !== false)
+            while ($element = mysqli_fetch_assoc($query)) 
+            {
+                $result[] = $element;
+            }
 
         return $result;
     }
