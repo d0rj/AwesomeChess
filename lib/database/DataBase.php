@@ -8,12 +8,12 @@ class DataBase
     private mysqli $connection;
 
 
-    public function __construct($connection = NULL)
+    public function __construct(string $name, mysqli $connection = NULL)
     {
         if ($connection !== NULL)
             $this->connection = $connection;
         else
-            $this->connection = mysqli_connect('127.0.0.1', 'root', 'root', 'chess_db');
+            $this->connection = mysqli_connect('127.0.0.1', 'root', 'root', $name);
     }
 
 
