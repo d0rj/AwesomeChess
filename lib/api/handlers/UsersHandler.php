@@ -12,15 +12,18 @@ class UsersHandler implements IRouteHandler
     private DataBase $db;
 
 
-    public function __construct() 
+    public function __construct(DataBase &$db = NULL) 
     {
-        $this->db = new DataBase();
+        if ($db === NULL)
+            $this->db = new DataBase();
+        else
+            $this->db = $db;
     }
 
 
     public function OnGET(array $args): void 
     {
-        if (count($args) === 0) 
+        if (count($args) === 0 || $args[0] === '') 
         {
             $usersList = $this->db->ExecuteGetList(new GetUsersCommand());
             echo json_encode($usersList);
