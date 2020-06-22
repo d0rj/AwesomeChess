@@ -15,7 +15,7 @@ class UsersHandler implements IRouteHandler
     public function __construct(DataBase &$db = NULL) 
     {
         if ($db === NULL)
-            $this->db = new DataBase();
+            $this->db = new DataBase('chess_db');
         else
             $this->db = $db;
     }
