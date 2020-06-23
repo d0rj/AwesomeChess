@@ -35,10 +35,14 @@ class UsersHandler implements IRouteHandler
             $user = $this->db->ExecuteGetList(new GetUsersCommand('`id` = '.$args[0]))[0];
 
             if (!isset($user))
+            {
+                header("HTTP/1.0 404 Not Found");
+
                 echo json_encode([
                     'errors' => 1,
                     'message' => 'No user with id '.$args[0]
                 ]);
+            }
             else 
                 echo json_encode($user);
 
@@ -49,11 +53,15 @@ class UsersHandler implements IRouteHandler
         {
             $user = $this->db->ExecuteGetList(new GetUsersCommand('`name` = \''.$args[0].'\''))[0];
 
-            if (!isset($user))
+            if (!isset($user)) 
+            {
+                header("HTTP/1.0 404 Not Found");
+
                 echo json_encode([
                     'errors' => 1,
                     'message' => 'No user with name \''.$args[0].'\''
                 ]);
+            }
             else 
                 echo json_encode($user);
 
@@ -68,6 +76,8 @@ class UsersHandler implements IRouteHandler
 
             return;
         }
+
+        header("HTTP/1.0 400 Bad Reqest");
 
         echo json_encode([
             'errors' => 1,
@@ -88,6 +98,8 @@ class UsersHandler implements IRouteHandler
 
             if ($queryResult === true) 
             {
+                header("HTTP/1.0 201 Created");
+
                 echo json_encode([
                     'errors' => 0,
                     'message' => 'User added.'
@@ -95,6 +107,8 @@ class UsersHandler implements IRouteHandler
             }
             else 
             {
+                header("HTTP/1.0 409 Conflict");
+
                 echo json_encode([
                     'errors' => 1,
                     'message' => 'User not added. User already exists or Error in db query.'
@@ -103,6 +117,8 @@ class UsersHandler implements IRouteHandler
         }
         else 
         {
+            header("HTTP/1.0 400 Bad Reqest");
+
             echo json_encode([
                 'errors' => 1,
                 'message' => 'To create new user you need to pass 3 arguments: name, email and password.'
@@ -125,20 +141,26 @@ class UsersHandler implements IRouteHandler
 
         if (!isset($name)) 
         {
+            header("HTTP/1.0 400 Bad Reqest");
+
             echo json_encode([
                 'errors' => 1,
                 'message' => 'Required argument \'name\' for updating '
             ]);
-            die();
+            
+            return;
         }
 
         if (!isset($newName) && !isset($newEmail) && !isset($newPassword)) 
         {
+            header("HTTP/1.0 406 Not Acceptable");
+
             echo json_encode([
                 'errors' => 1,
                 'message' => 'At least one property must be changed.'
             ]);
-            die();
+            
+            return;
         }
 
         /* TODO: Check for correct changes */
@@ -154,6 +176,8 @@ class UsersHandler implements IRouteHandler
         }
         else 
         {
+            header("HTTP/1.0 400 Bad Reqest");
+
             echo json_encode([
                 'errors' => 1,
                 'message' => 'User not updated. User not found or Error in db query.'

@@ -29,6 +29,8 @@ class LoginHandler implements IRouteHandler
 
         if ($loggedEmail === '') 
         {
+            header("HTTP/1.0 401 Unauthorized");
+            
             echo json_encode([
                 'errors' => 0,
                 'message' => 'You\'re not logged in.'
@@ -51,6 +53,8 @@ class LoginHandler implements IRouteHandler
 
         if (!isset($email) || !isset($password)) 
         {
+            header("HTTP/1.0 400 Bad Reqest");
+
             echo json_encode([
                 'errors' => 1,
                 'message' => 'Email and password required for login.'
@@ -82,6 +86,8 @@ class LoginHandler implements IRouteHandler
 
             return;
         }
+
+        header("HTTP/1.0 400 Bad Reqest");
 
         echo json_encode([
             'errors' => 1,
