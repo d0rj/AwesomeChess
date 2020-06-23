@@ -25,6 +25,28 @@ class Router
         $params = array_slice($params, 1);
 
         $method = $_SERVER['REQUEST_METHOD'];
-        call_user_func(array($this->handlers[$handler], 'On'.$method), $params);
+
+        if (!array_key_exists($handler, $this->handlers)) 
+        {
+            header("HTTP/1.0 404 Not Found");
+
+            echo json_encode([
+                'error' => 1,
+                'message' => 'Not found'
+            ]);
+
+            return;
+        }
+        
+        $result = call_user_func(array($this->handlers[$handler], 'On'.$method), $params);
+        if ($result === false)
+        {
+            header("HTTP/1.0 404 Not Found");
+
+            echo json_encode([
+                'error' => 1,
+                'message' => 'Not found'
+            ]);
+        }
     }
 }
