@@ -155,16 +155,51 @@ class ChessRules
     }
 
 
+    public static function GetKnightMoves(ChessBoard $board, int $row, int $col): array 
+    {
+        $result = [];
+
+        // Top
+        if (ChessRules::InBoard($row + 2, $col - 1) && ChessRules::IsEmpty($board->GetAt($row + 2, $col - 1)))
+            $result[] = [$row + 2, $col - 1];
+        if (ChessRules::InBoard($row + 2, $col + 1) && ChessRules::IsEmpty($board->GetAt($row + 2, $col + 1)))
+            $result[] = [$row + 2, $col + 1];
+
+        // Right
+        if (ChessRules::InBoard($row + 1, $col + 2) && ChessRules::IsEmpty($board->GetAt($row + 1, $col + 2)))
+            $result[] = [$row + 1, $col + 2];
+        if (ChessRules::InBoard($row - 1, $col + 2) && ChessRules::IsEmpty($board->GetAt($row - 1, $col + 2)))
+            $result[] = [$row - 1, $col + 2];
+
+        // Bot
+        if (ChessRules::InBoard($row - 2, $col - 1) && ChessRules::IsEmpty($board->GetAt($row - 2, $col - 1)))
+            $result[] = [$row - 2, $col - 1];
+        if (ChessRules::InBoard($row - 2, $col + 1) && ChessRules::IsEmpty($board->GetAt($row - 2, $col + 1)))
+            $result[] = [$row - 2, $col + 1];
+
+        // Left
+        if (ChessRules::InBoard($row + 1, $col - 2) && ChessRules::IsEmpty($board->GetAt($row + 1, $col - 2)))
+            $result[] = [$row + 1, $col - 2];
+        if (ChessRules::InBoard($row - 1, $col - 2) && ChessRules::IsEmpty($board->GetAt($row - 1, $col - 2)))
+            $result[] = [$row - 1, $col - 2];
+
+        return $result;
+    }
+
+
     // Move in 'e2-e4'
     public static function IsCorrectMove(ChessBoard $board, string $move): bool
     {
         list($from, $to) = explode('-', $move);
+        $toCoords = ChessRules::MoveNotationToCoords($to);
 
         $piece = $board->GetAt(... ChessRules::MoveNotationToCoords($from));
         if (ChessRules::IsPawn($piece))
-            return in_array(ChessRules::MoveNotationToCoords($to), ChessRules::GetPawnMoves($board, ... ChessRules::MoveNotationToCoords($from)));
+            return in_array($toCoords, ChessRules::GetPawnMoves($board, ... ChessRules::MoveNotationToCoords($from)));
         if (ChessRules::IsBishop($piece))
-            return in_array(ChessRules::MoveNotationToCoords($to), ChessRules::GetBishopMoves($board, ... ChessRules::MoveNotationToCoords($from)));
+            return in_array($toCoords, ChessRules::GetBishopMoves($board, ... ChessRules::MoveNotationToCoords($from)));
+        if (ChessRules::IsKnight($piece))
+            return in_array($toCoords, ChessRules::GetKnightMoves($board, ... ChessRules::MoveNotationToCoords($from)));
 
         return false;
     }
