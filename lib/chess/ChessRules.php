@@ -107,6 +107,42 @@ class ChessRules
     }
 
 
+    public static function GetPawnAttacks(ChessBoard $board, int $row, int $col): array 
+    {
+        $result = [];
+        $isWhite = ChessRules::IsWhiteChessman($board->GetAt($row, $col));
+
+        if ($isWhite) 
+        {
+            if (ChessRules::InBoard($row + 1, $col - 1) 
+                    && !ChessRules::IsEmpty($board->GetAt($row + 1, $col - 1)) 
+                    && !ChessRules::IsWhiteChessman($board->GetAt($row + 1, $col - 1))
+                    )
+                $result[] = [$row + 1, $col + 1];
+            if (ChessRules::InBoard($row + 1, $col + 1) 
+                    && !ChessRules::IsEmpty($board->GetAt($row + 1, $col + 1))
+                    && !ChessRules::IsWhiteChessman($board->GetAt($row + 1, $col + 1))
+                    )
+                $result[] = [$row + 1, $col + 1];
+        }
+        else 
+        {
+            if (ChessRules::InBoard($row - 1, $col - 1) 
+                    && !ChessRules::IsEmpty($board->GetAt($row + 1, $col - 1)) 
+                    && ChessRules::IsWhiteChessman($board->GetAt($row + 1, $col - 1))
+                    )
+                $result[] = [$row + 1, $col - 1];
+            if (ChessRules::InBoard($row + 1, $col + 1) 
+                    && !ChessRules::IsEmpty($board->GetAt($row + 1, $col + 1))
+                    && ChessRules::IsWhiteChessman($board->GetAt($row + 1, $col + 1))
+                    )
+                $result[] = [$row + 1, $col + 1];
+        }
+
+        return $result;
+    }
+
+
     public static function GetBishopMoves(ChessBoard $board, int $row, int $col): array 
     {
         $result = [];
