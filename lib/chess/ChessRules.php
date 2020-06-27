@@ -227,6 +227,37 @@ class ChessRules
     }
 
 
+    public static function GetQueenMoves(ChessBoard $board, int $row, int $col): array 
+    {
+        return array_merge(ChessRules::GetRookMoves($board, $row, $col), ChessRules::GetBishopMoves($board, $row, $col));
+    }
+
+
+    public static function GetKingMoves(ChessBoard $board, int $row, int $col): array 
+    {
+        $result = [];
+
+        if (ChessRules::InBoard($row + 1, $col) && ChessRules::IsEmpty($board->GetAt($row + 1, $col))) 
+            $result[] = [$row + 1, $col];
+        if (ChessRules::InBoard($row + 1, $col + 1) && ChessRules::IsEmpty($board->GetAt($row + 1, $col + 1))) 
+            $result[] = [$row + 1, $col + 1];
+        if (ChessRules::InBoard($row, $col + 1) && ChessRules::IsEmpty($board->GetAt($row, $col + 1))) 
+            $result[] = [$row, $col + 1];
+        if (ChessRules::InBoard($row - 1, $col + 1) && ChessRules::IsEmpty($board->GetAt($row - 1, $col + 1))) 
+            $result[] = [$row - 1, $col + 1];
+        if (ChessRules::InBoard($row - 1, $col) && ChessRules::IsEmpty($board->GetAt($row - 1, $col))) 
+            $result[] = [$row - 1, $col];
+        if (ChessRules::InBoard($row - 1, $col - 1) && ChessRules::IsEmpty($board->GetAt($row - 1, $col - 1))) 
+            $result[] = [$row - 1, $col - 1];
+        if (ChessRules::InBoard($row, $col - 1) && ChessRules::IsEmpty($board->GetAt($row, $col - 1))) 
+            $result[] = [$row, $col - 1];
+        if (ChessRules::InBoard($row + 1, $col - 1) && ChessRules::IsEmpty($board->GetAt($row + 1, $col - 1))) 
+            $result[] = [$row + 1, $col - 1];
+
+        return $result;
+    }
+
+
     // Move in 'e2-e4'
     public static function IsCorrectMove(ChessBoard $board, string $move): bool
     {
@@ -242,6 +273,8 @@ class ChessRules
             return in_array($toCoords, ChessRules::GetKnightMoves($board, ... ChessRules::MoveNotationToCoords($from)));
         if (ChessRules::IsRook($piece))
             return in_array($toCoords, ChessRules::GetRookMoves($board, ... ChessRules::MoveNotationToCoords($from)));
+        if (ChessRules::IsKing($piece))
+            return in_array($toCoords, ChessRules::GetKingMoves($board, ... ChessRules::MoveNotationToCoords($from)));
 
         return false;
     }
