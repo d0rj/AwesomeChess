@@ -187,6 +187,46 @@ class ChessRules
     }
 
 
+    public static function GetRookMoves(ChessBoard $board, int $row, int $col): array 
+    {
+        $result = [];
+
+        // Top
+        $offset = 1;
+        while (ChessRules::InBoard($row + $offset, $col) && ChessRules::IsEmpty($board->GetAt($row + $offset, $col))) 
+        {
+            $result[] = [$row + $offset, $col];
+            ++$offset;
+        }
+
+        // Right
+        $offset = 1;
+        while (ChessRules::InBoard($row, $col + $offset) && ChessRules::IsEmpty($board->GetAt($row, $col + $offset))) 
+        {
+            $result[] = [$row, $col + $offset];
+            ++$offset;
+        }
+
+        // Bot
+        $offset = -1;
+        while (ChessRules::InBoard($row + $offset, $col) && ChessRules::IsEmpty($board->GetAt($row + $offset, $col))) 
+        {
+            $result[] = [$row + $offset, $col];
+            --$offset;
+        }
+
+        // Left
+        $offset = -1;
+        while (ChessRules::InBoard($row, $col + $offset) && ChessRules::IsEmpty($board->GetAt($row, $col + $offset))) 
+        {
+            $result[] = [$row, $col + $offset];
+            --$offset;
+        }
+
+        return $result;
+    }
+
+
     // Move in 'e2-e4'
     public static function IsCorrectMove(ChessBoard $board, string $move): bool
     {
@@ -200,6 +240,8 @@ class ChessRules
             return in_array($toCoords, ChessRules::GetBishopMoves($board, ... ChessRules::MoveNotationToCoords($from)));
         if (ChessRules::IsKnight($piece))
             return in_array($toCoords, ChessRules::GetKnightMoves($board, ... ChessRules::MoveNotationToCoords($from)));
+        if (ChessRules::IsRook($piece))
+            return in_array($toCoords, ChessRules::GetRookMoves($board, ... ChessRules::MoveNotationToCoords($from)));
 
         return false;
     }
