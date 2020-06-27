@@ -262,19 +262,20 @@ class ChessRules
     public static function IsCorrectMove(ChessBoard $board, string $move): bool
     {
         list($from, $to) = explode('-', $move);
+        $fromCoords = ChessRules::MoveNotationToCoords($from);
         $toCoords = ChessRules::MoveNotationToCoords($to);
 
         $piece = $board->GetAt(... ChessRules::MoveNotationToCoords($from));
         if (ChessRules::IsPawn($piece))
-            return in_array($toCoords, ChessRules::GetPawnMoves($board, ... ChessRules::MoveNotationToCoords($from)));
+            return in_array($toCoords, ChessRules::GetPawnMoves($board, ... $fromCoords));
         if (ChessRules::IsBishop($piece))
-            return in_array($toCoords, ChessRules::GetBishopMoves($board, ... ChessRules::MoveNotationToCoords($from)));
+            return in_array($toCoords, ChessRules::GetBishopMoves($board, ... $fromCoords));
         if (ChessRules::IsKnight($piece))
-            return in_array($toCoords, ChessRules::GetKnightMoves($board, ... ChessRules::MoveNotationToCoords($from)));
+            return in_array($toCoords, ChessRules::GetKnightMoves($board, ... $fromCoords));
         if (ChessRules::IsRook($piece))
-            return in_array($toCoords, ChessRules::GetRookMoves($board, ... ChessRules::MoveNotationToCoords($from)));
+            return in_array($toCoords, ChessRules::GetRookMoves($board, ... $fromCoords));
         if (ChessRules::IsKing($piece))
-            return in_array($toCoords, ChessRules::GetKingMoves($board, ... ChessRules::MoveNotationToCoords($from)));
+            return in_array($toCoords, ChessRules::GetKingMoves($board, ... $fromCoords));
 
         return false;
     }
