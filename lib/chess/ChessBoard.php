@@ -1,6 +1,6 @@
 <?php
 
-require_once "./ChessRules.php";
+require_once "ChessRules.php";
 
 
 class ChessBoard 
