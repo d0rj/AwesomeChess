@@ -6,6 +6,7 @@ require_once __DIR__."/../../database/AuthCache.php";
 require_once __DIR__."/../../chess/ChessGame.php";
 require_once __DIR__."/../../chess/GameMessage.php";
 require_once __DIR__."/../../database/commands/AvailableGamesCommand.php";
+require_once __DIR__."/../../database/commands/GetGameCommand.php";
 
 
 class GameHandler implements IRouteHandler 
@@ -27,23 +28,37 @@ class GameHandler implements IRouteHandler
 
     public function OnGET(array $args): void 
     {
-        $loggedEmail = $this->cache->LoggedForEmail();
-
-        if ($loggedEmail === '') 
+        // All available games
+        if (count($args) === 0) 
         {
-            header("HTTP/1.0 401 Unauthorized");
-            
-            echo json_encode([
-                'errors' => 0,
-                'message' => 'You\'re not logged in.'
-            ]);
-
+            $loggedEmail = $this->cache->LoggedForEmail();
+    
+            if ($loggedEmail === '') 
+            {
+                header("HTTP/1.0 401 Unauthorized");
+                
+                echo json_encode([
+                    'errors' => 1,
+                    'message' => 'You\'re not logged in.'
+                ]);
+    
+                return;
+            }
+    
+            $games = $this->db->ExecuteGetList(new AvailableGamesCommand($loggedEmail));
+    
+            echo json_encode($games);
             return;
         }
+        // Get game by id
+        else if (count($args) === 1 && is_numeric($args[0])) 
+        {
+            $id = intval($args[0]);
+            $game = $this->db->ExecuteGetList(new GetGameCommand($id))[0];
 
-        $games = $this->db->ExecuteGetList(new AvailableGamesCommand($loggedEmail));
-
-        echo json_encode($games);
+            echo json_encode($game);
+            return;
+        }
     }
 
 

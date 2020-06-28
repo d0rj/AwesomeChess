@@ -17,6 +17,6 @@ class AvailableGamesCommand implements IDataBaseCommand
     public function GetStringQuery(): string 
     {
         $innerQuery = '(SELECT `users`.`id` AS user_id FROM `users` WHERE `users`.`email` = \''.$this->email.'\')';
-        return 'SELECT * FROM `games` WHERE `whiteId` = '.$innerQuery.' OR `blackId` = '.$innerQuery;
+        return 'SELECT `id`, `state`, `history`, `ended`, `whiteMove` FROM `games` WHERE `whiteId` = '.$innerQuery.' OR `blackId` = '.$innerQuery;
     }
 }
