@@ -392,6 +392,71 @@ class ChessRules
     }
 
 
+    public static function GetRookAttacks(ChessBoard $board, int $row, int $col): array 
+    {
+        $result = [];
+        $isWhite = ChessRules::IsWhiteChessman($board->GetAt($row, $col));
+
+        // Top
+        $offset = 1;
+        while (ChessRules::InBoard($row + $offset, $col)) 
+        {
+            if (!ChessRules::IsEmpty($board->GetAt($row + $offset, $col)))
+            {
+                if ($isWhite !== ChessRules::IsWhiteChessman($board->GetAt($row + $offset, $col)))
+                    $result[] = [$row + $offset, $col];
+                
+                break;
+            }
+            ++$offset;
+        }
+
+        // Right
+        $offset = 1;
+        while (ChessRules::InBoard($row, $col + $offset)) 
+        {
+            if (!ChessRules::IsEmpty($board->GetAt($row, $col + $offset))) 
+            {
+                if ($isWhite !== ChessRules::IsWhiteChessman($board->GetAt($row, $col + $offset)))
+                    $result[] = [$row, $col + $offset];
+                
+                break;
+            }
+            ++$offset;
+        }
+
+        // Bot
+        $offset = -1;
+        while (ChessRules::InBoard($row + $offset, $col)) 
+        {
+            if (!ChessRules::IsEmpty($board->GetAt($row + $offset, $col))) 
+            {
+                if ($isWhite !== ChessRules::IsWhiteChessman($board->GetAt($row + $offset, $col)))
+                    $result[] = [$row + $offset, $col];
+
+                break;
+            }
+            --$offset;
+        }
+
+        // Left
+        $offset = -1;
+        while (ChessRules::InBoard($row, $col + $offset)) 
+        {
+            if (!ChessRules::IsEmpty($board->GetAt($row, $col + $offset))) 
+            {
+                if ($isWhite !== ChessRules::IsWhiteChessman($board->GetAt($row, $col + $offset)))
+                    $result[] = [$row, $col + $offset];
+
+                break;
+            }
+            --$offset;
+        }
+
+        return $result;
+    }
+
+
     public static function GetQueenMoves(ChessBoard $board, int $row, int $col): array 
     {
         return array_merge(ChessRules::GetRookMoves($board, $row, $col), ChessRules::GetBishopMoves($board, $row, $col));
@@ -452,6 +517,8 @@ class ChessRules
             return in_array($to, ChessRules::GetBishopAttacks($board, ... $from));
         if (ChessRules::IsKnight($piece))
             return in_array($to, ChessRules::GetKnightAttacks($board, ... $from));
+        if (ChessRules::IsRook($piece))
+            return in_array($to, ChessRules::GetRookAttacks($board, ... $from));
 
         return false;
     }
