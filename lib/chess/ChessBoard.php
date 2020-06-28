@@ -27,4 +27,24 @@ class ChessBoard
     {
         $this->board[$row * 8 + $col] = $value;
     }
+
+
+    public function Move(array $from, array $to): void 
+    {
+        $piece = $this->GetAt($from[0], $from[1]);
+        $this->SetAt('.', $from[0], $from[1]);
+        $this->SetAt($piece, $to[0], $to[1]);
+    }
+
+
+    public function ToString(): string 
+    {
+        return implode($this->board);
+    }
+
+
+    public function FromString(string $board): void 
+    {
+        $this->board = str_split($board);
+    }
 }

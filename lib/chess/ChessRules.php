@@ -615,4 +615,18 @@ class ChessRules
 
         return false;
     }
+
+
+    // TODO: handle checkmate
+    public static function IsGameEnded(ChessBoard $board): bool 
+    {
+        $kingsCount = 0;
+
+        for ($i = 0; $i < 8; ++$i)
+            for ($j = 0; $j < 8; ++$j) 
+                if (ChessRules::IsKing($board->GetAt($i, $j)))
+                    ++$kingsCount;
+
+        return $kingsCount === 2;
+    }
 }
