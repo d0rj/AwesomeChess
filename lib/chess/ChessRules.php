@@ -296,6 +296,62 @@ class ChessRules
     }
 
 
+    public static function GetKnightAttacks(ChessBoard $board, int $row, int $col): array 
+    {
+        $result = [];
+        $isWhite = ChessRules::IsWhiteChessman($board->GetAt($row, $col));
+
+        // Top
+        if (ChessRules::InBoard($row + 2, $col - 1) 
+            && !ChessRules::IsEmpty($board->GetAt($row + 2, $col - 1))
+            && $isWhite !== ChessRules::IsWhiteChessman($board->GetAt($row + 2, $col - 1))
+            )
+            $result[] = [$row + 2, $col - 1];
+        if (ChessRules::InBoard($row + 2, $col + 1) 
+            && !ChessRules::IsEmpty($board->GetAt($row + 2, $col + 1))
+            && $isWhite !== ChessRules::IsWhiteChessman($board->GetAt($row + 2, $col + 1))
+            )
+            $result[] = [$row + 2, $col + 1];
+
+        // Right
+        if (ChessRules::InBoard($row + 1, $col + 2) 
+            && !ChessRules::IsEmpty($board->GetAt($row + 1, $col + 2))
+            && $isWhite !== ChessRules::IsWhiteChessman($board->GetAt($row + 1, $col + 2))
+            )
+            $result[] = [$row + 1, $col + 2];
+        if (ChessRules::InBoard($row - 1, $col + 2) 
+            && !ChessRules::IsEmpty($board->GetAt($row - 1, $col + 2))
+            && $isWhite !== ChessRules::IsWhiteChessman($board->GetAt($row - 1, $col + 2))
+            )
+            $result[] = [$row - 1, $col + 2];
+
+        // Bot
+        if (ChessRules::InBoard($row - 2, $col - 1) 
+            && !ChessRules::IsEmpty($board->GetAt($row - 2, $col - 1))
+            && $isWhite !== ChessRules::IsWhiteChessman($board->GetAt($row - 2, $col - 1))
+            )
+            $result[] = [$row - 2, $col - 1];
+        if (ChessRules::InBoard($row - 2, $col + 1) 
+            && !ChessRules::IsEmpty($board->GetAt($row - 2, $col + 1))
+            && $isWhite !== ChessRules::IsWhiteChessman($board->GetAt($row - 2, $col + 1))
+            )
+            $result[] = [$row - 2, $col + 1];
+
+        // Left
+        if (ChessRules::InBoard($row + 1, $col - 2) 
+            && !ChessRules::IsEmpty($board->GetAt($row + 1, $col - 2))
+            && $isWhite !== ChessRules::IsWhiteChessman($board->GetAt($row + 1, $col - 2))
+            )
+            $result[] = [$row + 1, $col - 2];
+        if (ChessRules::InBoard($row - 1, $col - 2) 
+            && !ChessRules::IsEmpty($board->GetAt($row - 1, $col - 2))
+            && $isWhite !== ChessRules::IsWhiteChessman($board->GetAt($row - 1, $col - 2)))
+            $result[] = [$row - 1, $col - 2];
+
+        return $result;
+    }
+
+
     public static function GetRookMoves(ChessBoard $board, int $row, int $col): array 
     {
         $result = [];
@@ -394,6 +450,8 @@ class ChessRules
             return in_array($to, ChessRules::GetPawnAttacks($board, ... $from));
         if (ChessRules::IsBishop($piece))
             return in_array($to, ChessRules::GetBishopAttacks($board, ... $from));
+        if (ChessRules::IsKnight($piece))
+            return in_array($to, ChessRules::GetKnightAttacks($board, ... $from));
 
         return false;
     }
