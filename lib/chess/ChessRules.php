@@ -463,6 +463,12 @@ class ChessRules
     }
 
 
+    public static function GetQueenAttacks(ChessBoard $board, int $row, int $col): array 
+    {
+        return array_merge(ChessRules::GetRookAttacks($board, $row, $col), ChessRules::GetBishopAttacks($board, $row, $col));
+    }
+
+
     public static function GetKingMoves(ChessBoard $board, int $row, int $col): array 
     {
         $result = [];
@@ -519,6 +525,8 @@ class ChessRules
             return in_array($to, ChessRules::GetKnightAttacks($board, ... $from));
         if (ChessRules::IsRook($piece))
             return in_array($to, ChessRules::GetRookAttacks($board, ... $from));
+        if (ChessRules::IsQueen($piece))
+            return in_array($to, ChessRules::GetQueenAttacks($board, ... $from));
 
         return false;
     }
