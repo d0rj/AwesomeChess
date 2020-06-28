@@ -2,6 +2,7 @@
 
 require_once __DIR__."/../IRouteHandler.php";
 require_once __DIR__."/../../database/DataBase.php";
+require_once __DIR__."/../../database/AuthCache.php";
 require_once __DIR__."/../../database/commands/GetUsersCommand.php";
 require_once __DIR__."/../../database/commands/CreateUserCommand.php";
 require_once __DIR__."/../../database/commands/UpdateUserCommand.php";
@@ -10,6 +11,7 @@ require_once __DIR__."/../../database/commands/UpdateUserCommand.php";
 class UsersHandler implements IRouteHandler 
 {
     private DataBase $db;
+    private AuthCache $cache;
 
 
     public function __construct(DataBase &$db = NULL) 
@@ -18,6 +20,8 @@ class UsersHandler implements IRouteHandler
             $this->db = new DataBase('chess_db');
         else
             $this->db = $db;
+
+        $this->cache = new AuthCache();
     }
 
 
@@ -129,23 +133,21 @@ class UsersHandler implements IRouteHandler
 
     public function OnPUT(array $args): void 
     {
-        /* TODO: Check access rules */
-
         $data = file_get_contents('php://input');
         $data = json_decode($data, true);
 
-        $name = $data['name'];
+        $email = $this->cache->LoggedForEmail();
         $newName = $data['newName'];
         $newEmail = $data['newEmail'];
         $newPassword = $data['newPassword'];
 
-        if (!isset($name)) 
+        if ($email === '') 
         {
-            header("HTTP/1.0 400 Bad Reqest");
+            header("HTTP/1.0 401 Unauthorized");
 
             echo json_encode([
                 'errors' => 1,
-                'message' => 'Required argument \'name\' for updating '
+                'message' => 'You\'re not logged in.'
             ]);
             
             return;
@@ -163,9 +165,10 @@ class UsersHandler implements IRouteHandler
             return;
         }
 
-        /* TODO: Check for correct changes */
-
-        $queryResult = $this->db->Execute(new UpdateUserCommand($name, $newName, $newEmail, $newPassword));
+        if (!isset($newName)) $newName = '';
+        if (!isset($newEmail)) $newEmail = '';
+        if (!isset($newPassword)) $newPassword = '';
+        $queryResult = $this->db->Execute(new UpdateUserCommand($email, $newName, $newEmail, $newPassword));
 
         if ($queryResult === true) 
         {
@@ -180,7 +183,7 @@ class UsersHandler implements IRouteHandler
 
             echo json_encode([
                 'errors' => 1,
-                'message' => 'User not updated. User not found or Error in db query.'
+                'message' => 'User not updated. Error in db query.'
             ]);
         }
     }

@@ -5,15 +5,15 @@ require_once __DIR__."/../IDataBaseCommand.php";
 
 class UpdateUserCommand implements IDataBaseCommand 
 {
-    private string $name = '';
+    private string $email = '';
     private string $newName = '';
     private string $newEmail = '';
     private string $newPassword = '';
 
 
-    public function __construct(string $name, string $newName = '', string $newEmail = '', string $newPassword = '') 
+    public function __construct(string $email, string $newName = '', string $newEmail = '', string $newPassword = '') 
     {
-        $this->name = $name;
+        $this->email = $email;
         $this->newName = $newName;
         $this->newEmail = $newEmail;
         $this->newPassword = $newPassword;
@@ -36,23 +36,26 @@ class UpdateUserCommand implements IDataBaseCommand
             $needComma = true;
         }
 
-        if ($needComma)
-            $result = $result.', ';
-
+        
         if ($this->newEmail !== '') 
         {
+            if ($needComma)
+                $result = $result.', ';
+
             $result = $result.'`email` = \''.$this->newEmail.'\'';
             $needComma = true;
         }
 
-        if ($needComma)
-            $result = $result.', ';
+        
+        if ($this->newPassword !== '') 
+        {
+            if ($needComma)
+                $result = $result.', ';
 
-        if ($this->newPassword !== '')
             $result = $result.'`password` = \''.$this->newPassword.'\' ';
+        }
 
-        $result = $result.'WHERE `users`.`name` = \''.$this->name.'\'';
-        echo $result;
+        $result = $result.'WHERE `users`.`email` = \''.$this->email.'\'';
 
         return $result;
     }
