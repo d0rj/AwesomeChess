@@ -69,6 +69,13 @@ class ChessRules
     }
 
 
+    // TODO: add castling support
+    public static function IsValidAction(string $action): bool 
+    {
+        return preg_match('/[a-h][1-8][\-|x][a-h][1-8]/', $action) === 1;
+    }
+
+
     public static function InBoard(int $row, int $col): bool 
     {
         return ($row >= 0) && ($row <= 7) && ($col >= 0) && ($col <= 7);
@@ -617,16 +624,17 @@ class ChessRules
     }
 
 
-    // TODO: handle checkmate
+    // TODO: handle checkmate, rework
     public static function IsGameEnded(ChessBoard $board): bool 
     {
-        $kingsCount = 0;
+        // $kingsCount = 0;
 
-        for ($i = 0; $i < 8; ++$i)
-            for ($j = 0; $j < 8; ++$j) 
-                if (ChessRules::IsKing($board->GetAt($i, $j)))
-                    ++$kingsCount;
+        // for ($i = 0; $i < 8; ++$i)
+        //     for ($j = 0; $j < 8; ++$j) 
+        //         if (ChessRules::IsKing($board->GetAt($i, $j)))
+        //             ++$kingsCount;
 
-        return $kingsCount === 2;
+        // return $kingsCount === 2;
+        return false;
     }
 }

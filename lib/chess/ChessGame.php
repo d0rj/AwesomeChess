@@ -16,7 +16,7 @@ class ChessGame
     public function __construct(string $board = '', string $history = '', bool $ended = false, bool $whiteMove = true) 
     {
         if ($board === '') $this->board = new ChessBoard();
-        else $this->board = str_split($board);
+        else $this->board = new ChessBoard(str_split($board));
 
         if ($history === '') $this->history = [];
         else $this->history = explode(';', $history);

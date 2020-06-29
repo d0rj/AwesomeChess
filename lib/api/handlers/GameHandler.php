@@ -9,6 +9,7 @@ require_once __DIR__."/../../database/commands/AvailableGamesCommand.php";
 require_once __DIR__."/../../database/commands/GetGameCommand.php";
 require_once __DIR__."/../../database/commands/GetUsersCommand.php";
 require_once __DIR__."/../../database/commands/CreateGameCommand.php";
+require_once __DIR__."/../../database/commands/UpdateGameCommand.php";
 
 
 class GameHandler implements IRouteHandler 
@@ -130,7 +131,100 @@ class GameHandler implements IRouteHandler
 
     public function OnPUT(array $args): void
     {
+        if (count($args) === 1 && is_numeric($args[0])) 
+        {
+            $email = $this->cache->LoggedForEmail();
+            if ($email === '') 
+            {
+                header("HTTP/1.0 401 Unauthorized");
 
+                echo json_encode([
+                    'errors' => 1,
+                    'message' => 'You\'re not logged in.'
+                ]);                
+                return;
+            }
+
+            $data = file_get_contents('php://input');
+            $data = json_decode($data, true);
+
+            $action = $data['action'];
+            if (!isset($action)) 
+            {
+                header("HTTP/1.0 406 Not Acceptable");
+
+                echo json_encode([
+                    'errors' => 1,
+                    'message' => 'You need to set property \'action\'.'
+                ]);
+                return;
+            }
+
+            if (!ChessRules::IsValidAction($action)) 
+            {
+                header("HTTP/1.0 400 Bad Request");
+
+                echo json_encode([
+                    'errors' => 1,
+                    'message' => 'Invalid action.'
+                ]);
+                return;
+            }
+
+            $gameInfo = $this->db->ExecuteGetList(new GetGameCommand(intval($args[0])))[0];
+            if (!isset($gameInfo)) 
+            {
+                header("HTTP/1.0 404 Not Found");
+
+                echo json_encode([
+                    'errors' => 1,
+                    'message' => 'Game with this ID not found.'
+                ]);
+                return;
+            }
+
+            $history = strval($gameInfo['history']);
+            $ended = boolval($gameInfo['ended']);
+            $whiteMove = boolval($gameInfo['whiteMove']);
+            $game = new ChessGame($gameInfo['state'], $history, $ended, $whiteMove);
+            $result = $game->Action($action);
+            switch ($result) 
+            {
+                case GameMessage::OK:
+                    $dbResult = $this->db->Execute(new UpdateGameCommand($args[0], $game));
+
+                    header('HTTP/1.0 202 Accepted');
+                    echo json_encode([
+                        'errors' => 0,
+                        'message' => 'Ok.'
+                    ]);
+                    break;
+                case GameMessage::INVALID_MOVE:
+                    header('HTTP/1.0 400 Bad Request');
+                    echo json_encode([
+                        'errors' => 1,
+                        'message' => 'Invalid move.'
+                    ]);
+                    break;
+                case GameMessage::GAME_ENDED:
+                    header('HTTP/1.0 200 OK');
+                    echo json_encode([
+                        'errors' => 0,
+                        'message' => 'Game ended.'
+                    ]);
+                    break;
+                case GameMessage::WHITE_WIN:
+                case GameMessage::BLACK_WIN:
+                    break;
+                default:
+                    header('400 Bad Request');
+                    echo json_encode([
+                        'errors' => 1,
+                        'message' => 'Error.'
+                    ]);
+                    break;
+            }
+        }
     }
 
 
