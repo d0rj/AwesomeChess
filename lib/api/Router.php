@@ -1,6 +1,7 @@
 <?php 
 
 require_once __DIR__."/IRouteHandler.php";
+require_once __DIR__."../../Responce.php";
 
 
 class Router 
@@ -16,7 +17,7 @@ class Router
 	
 	public function Work(): void 
 	{
-		header('Content-type: json/application');
+		$responce = new Responce();
 		
 		$q = $_GET['q'];
 		$params = explode('/', $q);
@@ -28,37 +29,20 @@ class Router
 
 		if (!array_key_exists($handler, $this->handlers)) 
 		{
-			header("HTTP/1.0 404 Not Found");
-
-			echo json_encode([
-				'error' => 1,
-				'message' => 'Not found API for \''.$handler.'\'.'
-			]);
-
+			$responce->Send(404, 'Not found API for \''.$handler.'\'.');
 			return;
 		}
 		
 		if (!method_exists($this->handlers[$handler], 'On'.$method)) 
 		{
-			header("HTTP/1.0 404 Not Found");
-
-			echo json_encode([
-				'error' => 1,
-				'message' => 'Not found method \''.$method.'\' for this API part.'
-			]);
-
+			$responce->Send(404, 'Not found method \''.$method.'\' for this API part.');
 			return;
 		}
 
 		$result = call_user_func(array($this->handlers[$handler], 'On'.$method), $params);
 		if ($result === false)
 		{
-			header("HTTP/1.0 404 Not Found");
-
-			echo json_encode([
-				'error' => 1,
-				'message' => 'API not working...'
-			]);
+			$responce->Send(404, 'API not working...');
 		}
 	}
 }
