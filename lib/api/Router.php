@@ -38,6 +38,18 @@ class Router
 			return;
 		}
 		
+		if (!method_exists($this->handlers[$handler], 'On'.$method)) 
+		{
+			header("HTTP/1.0 404 Not Found");
+
+			echo json_encode([
+				'error' => 1,
+				'message' => 'Not found'
+			]);
+
+			return;
+		}
+
 		$result = call_user_func(array($this->handlers[$handler], 'On'.$method), $params);
 		if ($result === false)
 		{
