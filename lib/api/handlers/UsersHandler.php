@@ -10,199 +10,199 @@ require_once __DIR__."/../../database/commands/UpdateUserCommand.php";
 
 class UsersHandler implements IRouteHandler 
 {
-    private DataBase $db;
-    private AuthCache $cache;
+	private DataBase $db;
+	private AuthCache $cache;
 
 
-    public function __construct(DataBase &$db = NULL) 
-    {
-        if ($db === NULL)
-            $this->db = new DataBase('chess_db');
-        else
-            $this->db = $db;
+	public function __construct(DataBase &$db = NULL) 
+	{
+		if ($db === NULL)
+			$this->db = new DataBase('chess_db');
+		else
+			$this->db = $db;
 
-        $this->cache = new AuthCache();
-    }
-
-
-    public function OnGET(array $args): void 
-    {
-        if (count($args) === 0 || $args[0] === '') 
-        {
-            $usersList = $this->db->ExecuteGetList(new GetUsersCommand());
-            echo json_encode($usersList);
-            return;
-        }
-
-        if ($this->paramsIsGetById($args)) 
-        {
-            $user = $this->db->ExecuteGetList(new GetUsersCommand('`id` = '.$args[0]))[0];
-
-            if (!isset($user))
-            {
-                header("HTTP/1.0 404 Not Found");
-
-                echo json_encode([
-                    'errors' => 1,
-                    'message' => 'No user with id '.$args[0]
-                ]);
-            }
-            else 
-                echo json_encode($user);
-
-            return;
-        }
-
-        if (count($args) === 1) 
-        {
-            $user = $this->db->ExecuteGetList(new GetUsersCommand('`name` = \''.$args[0].'\''))[0];
-
-            if (!isset($user)) 
-            {
-                header("HTTP/1.0 404 Not Found");
-
-                echo json_encode([
-                    'errors' => 1,
-                    'message' => 'No user with name \''.$args[0].'\''
-                ]);
-            }
-            else 
-                echo json_encode($user);
-
-            return;
-        }
-
-        if ($this->paramsIsGetByRating($args)) 
-        {
-            $users = $this->db->ExecuteGetList(new GetUsersCommand('`rating` = '.$args[1]));
-
-            echo json_encode($users);
-
-            return;
-        }
-
-        header("HTTP/1.0 400 Bad Reqest");
-
-        echo json_encode([
-            'errors' => 1,
-            'message' => 'Unknown command.'
-        ]);
-    }
+		$this->cache = new AuthCache();
+	}
 
 
-    public function OnPOST(array $args): void 
-    {
-        $name = $_POST['name'];
-        $email = $_POST['email'];
-        $password = $_POST['password'];
+	public function OnGET(array $args): void 
+	{
+		if (count($args) === 0 || $args[0] === '') 
+		{
+			$usersList = $this->db->ExecuteGetList(new GetUsersCommand());
+			echo json_encode($usersList);
+			return;
+		}
 
-        if (isset($name) && isset($email) && isset($password)) 
-        {
-            $queryResult = $this->db->Execute(new CreateUserCommand($name, $email, $password));
+		if ($this->paramsIsGetById($args)) 
+		{
+			$user = $this->db->ExecuteGetList(new GetUsersCommand('`id` = '.$args[0]))[0];
 
-            if ($queryResult === true) 
-            {
-                header("HTTP/1.0 201 Created");
+			if (!isset($user))
+			{
+				header("HTTP/1.0 404 Not Found");
 
-                echo json_encode([
-                    'errors' => 0,
-                    'message' => 'User added.'
-                ]);
-            }
-            else 
-            {
-                header("HTTP/1.0 409 Conflict");
+				echo json_encode([
+					'errors' => 1,
+					'message' => 'No user with id '.$args[0]
+				]);
+			}
+			else 
+				echo json_encode($user);
 
-                echo json_encode([
-                    'errors' => 1,
-                    'message' => 'User not added. User already exists or Error in db query.'
-                ]);
-            }
-        }
-        else 
-        {
-            header("HTTP/1.0 400 Bad Reqest");
+			return;
+		}
 
-            echo json_encode([
-                'errors' => 1,
-                'message' => 'To create new user you need to pass 3 arguments: name, email and password.'
-            ]);
-        }
-    }
+		if (count($args) === 1) 
+		{
+			$user = $this->db->ExecuteGetList(new GetUsersCommand('`name` = \''.$args[0].'\''))[0];
 
+			if (!isset($user)) 
+			{
+				header("HTTP/1.0 404 Not Found");
 
-    public function OnPUT(array $args): void 
-    {
-        $data = file_get_contents('php://input');
-        $data = json_decode($data, true);
+				echo json_encode([
+					'errors' => 1,
+					'message' => 'No user with name \''.$args[0].'\''
+				]);
+			}
+			else 
+				echo json_encode($user);
 
-        $email = $this->cache->LoggedForEmail();
-        $newName = $data['newName'];
-        $newEmail = $data['newEmail'];
-        $newPassword = $data['newPassword'];
+			return;
+		}
 
-        if ($email === '') 
-        {
-            header("HTTP/1.0 401 Unauthorized");
+		if ($this->paramsIsGetByRating($args)) 
+		{
+			$users = $this->db->ExecuteGetList(new GetUsersCommand('`rating` = '.$args[1]));
 
-            echo json_encode([
-                'errors' => 1,
-                'message' => 'You\'re not logged in.'
-            ]);
-            
-            return;
-        }
+			echo json_encode($users);
 
-        if (!isset($newName) && !isset($newEmail) && !isset($newPassword)) 
-        {
-            header("HTTP/1.0 406 Not Acceptable");
+			return;
+		}
 
-            echo json_encode([
-                'errors' => 1,
-                'message' => 'At least one property must be changed.'
-            ]);
-            
-            return;
-        }
+		header("HTTP/1.0 400 Bad Reqest");
 
-        if (!isset($newName)) $newName = '';
-        if (!isset($newEmail)) $newEmail = '';
-        if (!isset($newPassword)) $newPassword = '';
-        $queryResult = $this->db->Execute(new UpdateUserCommand($email, $newName, $newEmail, $newPassword));
-
-        if ($queryResult === true) 
-        {
-            echo json_encode([
-                'errors' => 0,
-                'message' => 'User updated.'
-            ]);
-        }
-        else 
-        {
-            header("HTTP/1.0 400 Bad Reqest");
-
-            echo json_encode([
-                'errors' => 1,
-                'message' => 'User not updated. Error in db query.'
-            ]);
-        }
-    }
-
-    
-    public function OnDELETE(array $args): void 
-    {
-
-    }
+		echo json_encode([
+			'errors' => 1,
+			'message' => 'Unknown command.'
+		]);
+	}
 
 
-    private function paramsIsGetById(array $args): bool
-    {
-        return count($args) === 1 && is_numeric($args[0]);
-    }
+	public function OnPOST(array $args): void 
+	{
+		$name = $_POST['name'];
+		$email = $_POST['email'];
+		$password = $_POST['password'];
+
+		if (isset($name) && isset($email) && isset($password)) 
+		{
+			$queryResult = $this->db->Execute(new CreateUserCommand($name, $email, $password));
+
+			if ($queryResult === true) 
+			{
+				header("HTTP/1.0 201 Created");
+
+				echo json_encode([
+					'errors' => 0,
+					'message' => 'User added.'
+				]);
+			}
+			else 
+			{
+				header("HTTP/1.0 409 Conflict");
+
+				echo json_encode([
+					'errors' => 1,
+					'message' => 'User not added. User already exists or Error in db query.'
+				]);
+			}
+		}
+		else 
+		{
+			header("HTTP/1.0 400 Bad Reqest");
+
+			echo json_encode([
+				'errors' => 1,
+				'message' => 'To create new user you need to pass 3 arguments: name, email and password.'
+			]);
+		}
+	}
 
 
-    private function paramsIsGetByRating(array $args): bool 
-    {
-        return count($args) === 2 && $args[0] === 'rating' && is_numeric($args[1]);
-    }
+	public function OnPUT(array $args): void 
+	{
+		$data = file_get_contents('php://input');
+		$data = json_decode($data, true);
+
+		$email = $this->cache->LoggedForEmail();
+		$newName = $data['newName'];
+		$newEmail = $data['newEmail'];
+		$newPassword = $data['newPassword'];
+
+		if ($email === '') 
+		{
+			header("HTTP/1.0 401 Unauthorized");
+
+			echo json_encode([
+				'errors' => 1,
+				'message' => 'You\'re not logged in.'
+			]);
+			
+			return;
+		}
+
+		if (!isset($newName) && !isset($newEmail) && !isset($newPassword)) 
+		{
+			header("HTTP/1.0 406 Not Acceptable");
+
+			echo json_encode([
+				'errors' => 1,
+				'message' => 'At least one property must be changed.'
+			]);
+			
+			return;
+		}
+
+		if (!isset($newName)) $newName = '';
+		if (!isset($newEmail)) $newEmail = '';
+		if (!isset($newPassword)) $newPassword = '';
+		$queryResult = $this->db->Execute(new UpdateUserCommand($email, $newName, $newEmail, $newPassword));
+
+		if ($queryResult === true) 
+		{
+			echo json_encode([
+				'errors' => 0,
+				'message' => 'User updated.'
+			]);
+		}
+		else 
+		{
+			header("HTTP/1.0 400 Bad Reqest");
+
+			echo json_encode([
+				'errors' => 1,
+				'message' => 'User not updated. Error in db query.'
+			]);
+		}
+	}
+
+	
+	public function OnDELETE(array $args): void 
+	{
+
+	}
+
+
+	private function paramsIsGetById(array $args): bool
+	{
+		return count($args) === 1 && is_numeric($args[0]);
+	}
+
+
+	private function paramsIsGetByRating(array $args): bool 
+	{
+		return count($args) === 2 && $args[0] === 'rating' && is_numeric($args[1]);
+	}
 }

@@ -2,5 +2,5 @@
 
 interface IDataBaseCommand 
 {
-    public function GetStringQuery(): string;
+	public function GetStringQuery(): string;
 }
