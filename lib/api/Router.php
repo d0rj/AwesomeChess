@@ -32,7 +32,7 @@ class Router
 
 			echo json_encode([
 				'error' => 1,
-				'message' => 'Not found'
+				'message' => 'Not found API for \''.$handler.'\'.'
 			]);
 
 			return;
@@ -44,7 +44,7 @@ class Router
 
 			echo json_encode([
 				'error' => 1,
-				'message' => 'Not found'
+				'message' => 'Not found method \''.$method.'\' for this API part.'
 			]);
 
 			return;
@@ -57,7 +57,7 @@ class Router
 
 			echo json_encode([
 				'error' => 1,
-				'message' => 'Not found'
+				'message' => 'API not working...'
 			]);
 		}
 	}
