@@ -4,6 +4,7 @@ require_once __DIR__."/../IRouteHandler.php";
 require_once __DIR__."/../../database/DataBase.php";
 require_once __DIR__."/../../database/commands/GetUsersCommand.php";
 require_once __DIR__."/../../database/AuthCache.php";
+require_once __DIR__."../../../Responce.php";
 
 
 class LoginHandler implements IRouteHandler 
@@ -29,20 +30,11 @@ class LoginHandler implements IRouteHandler
 
 		if ($loggedEmail === '') 
 		{
-			header("HTTP/1.0 401 Unauthorized");
-			
-			echo json_encode([
-				'errors' => 0,
-				'message' => 'You\'re not logged in.'
-			]);
-
+			Responce::Send(401, 'You\'re not logged in.');
 			return;
 		}
 
-		echo json_encode([
-			'errors' => 0,
-			'message' => 'Logged for email: \''.$loggedEmail.'\''
-		]);
+		Responce::Send(200, 'Logged for email: \''.$loggedEmail.'\'.');
 	}
 
 
@@ -53,23 +45,13 @@ class LoginHandler implements IRouteHandler
 
 		if (!isset($email) || !isset($password)) 
 		{
-			header("HTTP/1.0 400 Bad Reqest");
-
-			echo json_encode([
-				'errors' => 1,
-				'message' => 'Email and password required for login.'
-			]);
-
+			Responce::Send(400, 'Email and password required for login.');
 			return;
 		}
 
 		if ($this->cache->LoggedForEmail() === $email) 
 		{
-			echo json_encode([
-				'errors' => 0,
-				'message' => 'You\'re already logged in.'
-			]);
-
+			Responce::Send(200, 'You\'re already logged in.');
 			return;
 		}
 
@@ -78,21 +60,11 @@ class LoginHandler implements IRouteHandler
 		if (isset($users) && count($users) === 1) 
 		{
 			$this->cache->SetLoggedIn($email);
-
-			echo json_encode([
-				'errors' => 0,
-				'message' => 'Login successfull.'
-			]);
-
+			Responce::Send(200, 'Login successfull.');
 			return;
 		}
 
-		header("HTTP/1.0 400 Bad Reqest");
-
-		echo json_encode([
-			'errors' => 1,
-			'message' => 'No users with this email or password.'
-		]);
+		Responce::Send(400, 'No users with this email or password.');
 	}
 
 

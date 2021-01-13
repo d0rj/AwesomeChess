@@ -10,7 +10,7 @@ require_once __DIR__."/../../database/commands/GetGameCommand.php";
 require_once __DIR__."/../../database/commands/GetUsersCommand.php";
 require_once __DIR__."/../../database/commands/CreateGameCommand.php";
 require_once __DIR__."/../../database/commands/UpdateGameCommand.php";
-require_once __DIR__."../../Router.php";
+require_once __DIR__."../../../Responce.php";
 
 
 class GameHandler implements IRouteHandler 
