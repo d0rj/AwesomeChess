@@ -20,19 +20,23 @@ class Responce
         '208' => 'Already Reported',
         '226' => 'IM Used',
 
+        '400' => 'Bad Request',
+        '401' => 'Unauthorized',
         '404' => 'Not Found',
+        '406' => 'Not Acceptable',
+        '409' => 'Conflict',
     ];
 
 
-    public function __construct() 
+    public static function Init() 
     {
         header('Content-type: json/application');
     }
 
 
-    public function Send(int $statusCode, string $message) 
+    public static function Send(int $statusCode, $message) 
     {
-        header('HTTP/1.0 '.$statusCode.' '.$this->statusNames[strval($statusCode)]);
+        header('HTTP/1.0 '.$statusCode.' '.Responce::$statusNames[strval($statusCode)]);
 
 		echo json_encode([
 			'error' => ($statusCode > 300) ? 1 : 0,

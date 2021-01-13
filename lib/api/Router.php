@@ -17,7 +17,7 @@ class Router
 	
 	public function Work(): void 
 	{
-		$responce = new Responce();
+		Responce::Init();
 		
 		$q = $_GET['q'];
 		$params = explode('/', $q);
@@ -29,20 +29,20 @@ class Router
 
 		if (!array_key_exists($handler, $this->handlers)) 
 		{
-			$responce->Send(404, 'Not found API for \''.$handler.'\'.');
+			Responce::Send(404, 'Not found API for \''.$handler.'\'.');
 			return;
 		}
 		
 		if (!method_exists($this->handlers[$handler], 'On'.$method)) 
 		{
-			$responce->Send(404, 'Not found method \''.$method.'\' for this API part.');
+			Responce::Send(404, 'Not found method \''.$method.'\' for this API part.');
 			return;
 		}
 
 		$result = call_user_func(array($this->handlers[$handler], 'On'.$method), $params);
 		if ($result === false)
 		{
-			$responce->Send(404, 'API not working...');
+			Responce::Send(404, 'API not working...');
 		}
 	}
 }

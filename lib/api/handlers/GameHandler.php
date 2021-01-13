@@ -10,6 +10,7 @@ require_once __DIR__."/../../database/commands/GetGameCommand.php";
 require_once __DIR__."/../../database/commands/GetUsersCommand.php";
 require_once __DIR__."/../../database/commands/CreateGameCommand.php";
 require_once __DIR__."/../../database/commands/UpdateGameCommand.php";
+require_once __DIR__."../../Router.php";
 
 
 class GameHandler implements IRouteHandler 
@@ -38,19 +39,13 @@ class GameHandler implements IRouteHandler
 	
 			if ($loggedEmail === '') 
 			{
-				header("HTTP/1.0 401 Unauthorized");
-				
-				echo json_encode([
-					'errors' => 1,
-					'message' => 'You\'re not logged in.'
-				]);
-	
+				Responce::Send(401, 'You\'re not logged in.');	
 				return;
 			}
 	
 			$games = $this->db->ExecuteGetList(new AvailableGamesCommand($loggedEmail));
 	
-			echo json_encode($games);
+			Responce::Send(200, $games);
 			return;
 		}
 		// Get game by id
@@ -59,7 +54,7 @@ class GameHandler implements IRouteHandler
 			$id = intval($args[0]);
 			$game = $this->db->ExecuteGetList(new GetGameCommand($id))[0];
 
-			echo json_encode($game);
+			Responce::Send(200, $game);
 			return;
 		}
 	}
@@ -71,37 +66,21 @@ class GameHandler implements IRouteHandler
 
 		if (!isset($secondEmail)) 
 		{
-			header("HTTP/1.0 400 Bad Reqest");
-
-			echo json_encode([
-				'errors' => 1,
-				'message' => 'To create new game you need to pass 1 arguments: \'secondEmail\' is email of second player.'
-			]);
+			Responce::Send(400, 'To create new game you need to pass 1 arguments: \'secondEmail\' is email of second player.');
 			return;
 		}
 
 		$loggedEmail = $this->cache->LoggedForEmail();    
 		if ($loggedEmail === '') 
 		{
-			header("HTTP/1.0 401 Unauthorized");
-			
-			echo json_encode([
-				'errors' => 1,
-				'message' => 'You\'re not logged in.'
-			]);
-	
+			Responce::Send(401, 'You\'re not logged in.');	
 			return;
 		}
 
 		$secondUser = $this->db->ExecuteGetList(new GetUsersCommand('`email` = \''.$secondEmail.'\''))[0];
 		if (!isset($secondUser)) 
 		{
-			header("HTTP/1.0 404 Not Found");
-
-			echo json_encode([
-				'errors' => 1,
-				'message' => 'No user found with this email.'
-			]);
+			Responce::Send(404, 'No user found with this email.');
 			return;
 		}
 
@@ -110,21 +89,11 @@ class GameHandler implements IRouteHandler
 		$result = $this->db->Execute(new CreateGameCommand($firstId, $secondId));
 		if ($result === true) 
 		{
-			header("HTTP/1.0 201 Created");
-
-			echo json_encode([
-				'errors' => 0,
-				'message' => 'Game created.'
-			]);
+			Responce::Send(201, 'Game created.');
 		}
 		else 
 		{
-			header("HTTP/1.0 409 Conflict");
-
-			echo json_encode([
-				'errors' => 1,
-				'message' => 'Game not created. Error in db query.'
-			]);
+			Responce::Send(409, 'Game not created. Error in db query.');
 		}
 	}
 
@@ -136,12 +105,7 @@ class GameHandler implements IRouteHandler
 			$email = $this->cache->LoggedForEmail();
 			if ($email === '') 
 			{
-				header("HTTP/1.0 401 Unauthorized");
-
-				echo json_encode([
-					'errors' => 1,
-					'message' => 'You\'re not logged in.'
-				]);                
+				Responce::Send(401, 'You\'re not logged in.');
 				return;
 			}
 
@@ -151,35 +115,20 @@ class GameHandler implements IRouteHandler
 			$action = $data['action'];
 			if (!isset($action)) 
 			{
-				header("HTTP/1.0 406 Not Acceptable");
-
-				echo json_encode([
-					'errors' => 1,
-					'message' => 'You need to set property \'action\'.'
-				]);
+				Responce::Send(406, 'You need to set property \'action\'.');
 				return;
 			}
 
 			if (!ChessRules::IsValidAction($action)) 
 			{
-				header("HTTP/1.0 400 Bad Request");
-
-				echo json_encode([
-					'errors' => 1,
-					'message' => 'Invalid action.'
-				]);
+				Responce::Send(400, 'Invalid action.');
 				return;
 			}
 
 			$gameInfo = $this->db->ExecuteGetList(new GetGameCommand(intval($args[0])))[0];
 			if (!isset($gameInfo)) 
 			{
-				header("HTTP/1.0 404 Not Found");
-
-				echo json_encode([
-					'errors' => 1,
-					'message' => 'Game with this ID not found.'
-				]);
+				Responce::Send(404, 'Game with this ID not found.');
 				return;
 			}
 
@@ -188,42 +137,35 @@ class GameHandler implements IRouteHandler
 			$whiteMove = boolval($gameInfo['whiteMove']);
 			$game = new ChessGame($gameInfo['state'], $history, $ended, $whiteMove);
 			$result = $game->Action($action);
+
+			$code = 200;
+			$message = '';
 			switch ($result) 
 			{
 				case GameMessage::OK:
 					$dbResult = $this->db->Execute(new UpdateGameCommand($args[0], $game));
 
-					header('HTTP/1.0 202 Accepted');
-					echo json_encode([
-						'errors' => 0,
-						'message' => 'Ok.'
-					]);
+					$code = 202;
+					$message = 'Ok.';
 					break;
 				case GameMessage::INVALID_MOVE:
-					header('HTTP/1.0 400 Bad Request');
-					echo json_encode([
-						'errors' => 1,
-						'message' => 'Invalid move.'
-					]);
+					$code = 400;
+					$message = 'Invalid move.';
 					break;
 				case GameMessage::GAME_ENDED:
-					header('HTTP/1.0 200 OK');
-					echo json_encode([
-						'errors' => 0,
-						'message' => 'Game ended.'
-					]);
+					$code = 200;
+					$message = 'Game ended.';
 					break;
 				case GameMessage::WHITE_WIN:
 				case GameMessage::BLACK_WIN:
 					break;
 				default:
-					header('400 Bad Request');
-					echo json_encode([
-						'errors' => 1,
-						'message' => 'Error.'
-					]);
+					$code = 400;
+					$message = 'Unknown error.';
 					break;
 			}
+
+			Responce::Send($code, $message);
 		}
 	}
 
