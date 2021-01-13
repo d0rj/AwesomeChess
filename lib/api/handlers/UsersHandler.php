@@ -6,6 +6,7 @@ require_once __DIR__."/../../database/AuthCache.php";
 require_once __DIR__."/../../database/commands/GetUsersCommand.php";
 require_once __DIR__."/../../database/commands/CreateUserCommand.php";
 require_once __DIR__."/../../database/commands/UpdateUserCommand.php";
+require_once __DIR__."../../../Responce.php";
 
 
 class UsersHandler implements IRouteHandler 
@@ -30,7 +31,8 @@ class UsersHandler implements IRouteHandler
 		if (count($args) === 0 || $args[0] === '') 
 		{
 			$usersList = $this->db->ExecuteGetList(new GetUsersCommand());
-			echo json_encode($usersList);
+
+			Responce::Send(200, $usersList);
 			return;
 		}
 
@@ -40,15 +42,10 @@ class UsersHandler implements IRouteHandler
 
 			if (!isset($user))
 			{
-				header("HTTP/1.0 404 Not Found");
-
-				echo json_encode([
-					'errors' => 1,
-					'message' => 'No user with id '.$args[0]
-				]);
+				Responce::Send(404, 'No user with id '.$args[0].'.');
 			}
 			else 
-				echo json_encode($user);
+				Responce::Send(200, $user);
 
 			return;
 		}
@@ -59,15 +56,10 @@ class UsersHandler implements IRouteHandler
 
 			if (!isset($user)) 
 			{
-				header("HTTP/1.0 404 Not Found");
-
-				echo json_encode([
-					'errors' => 1,
-					'message' => 'No user with name \''.$args[0].'\''
-				]);
+				Responce::Send(404, 'No user with name \''.$args[0].'\'.')
 			}
 			else 
-				echo json_encode($user);
+				Responce::Send(200, $user);
 
 			return;
 		}
@@ -76,17 +68,11 @@ class UsersHandler implements IRouteHandler
 		{
 			$users = $this->db->ExecuteGetList(new GetUsersCommand('`rating` = '.$args[1]));
 
-			echo json_encode($users);
-
+			Responce::Send(200, $users);
 			return;
 		}
-
-		header("HTTP/1.0 400 Bad Reqest");
-
-		echo json_encode([
-			'errors' => 1,
-			'message' => 'Unknown command.'
-		]);
+		
+		Responce::Send(400, 'Unknown command.');
 	}
 
 
@@ -102,31 +88,16 @@ class UsersHandler implements IRouteHandler
 
 			if ($queryResult === true) 
 			{
-				header("HTTP/1.0 201 Created");
-
-				echo json_encode([
-					'errors' => 0,
-					'message' => 'User added.'
-				]);
+				Responce::Send(201, 'User added.');
 			}
 			else 
 			{
-				header("HTTP/1.0 409 Conflict");
-
-				echo json_encode([
-					'errors' => 1,
-					'message' => 'User not added. User already exists or Error in db query.'
-				]);
+				Responce::Send(409, 'User not added. User already exists or Error in db query.');
 			}
 		}
 		else 
 		{
-			header("HTTP/1.0 400 Bad Reqest");
-
-			echo json_encode([
-				'errors' => 1,
-				'message' => 'To create new user you need to pass 3 arguments: name, email and password.'
-			]);
+			Responce::Send(400, 'To create new user you need to pass 3 arguments: name, email and password.');
 		}
 	}
 
@@ -143,25 +114,13 @@ class UsersHandler implements IRouteHandler
 
 		if ($email === '') 
 		{
-			header("HTTP/1.0 401 Unauthorized");
-
-			echo json_encode([
-				'errors' => 1,
-				'message' => 'You\'re not logged in.'
-			]);
-			
+			Responce::Send(401, 'You\'re not logged in.');			
 			return;
 		}
 
 		if (!isset($newName) && !isset($newEmail) && !isset($newPassword)) 
 		{
-			header("HTTP/1.0 406 Not Acceptable");
-
-			echo json_encode([
-				'errors' => 1,
-				'message' => 'At least one property must be changed.'
-			]);
-			
+			Responce::Send(406, 'At least one property must be changed.');			
 			return;
 		}
 
@@ -172,19 +131,11 @@ class UsersHandler implements IRouteHandler
 
 		if ($queryResult === true) 
 		{
-			echo json_encode([
-				'errors' => 0,
-				'message' => 'User updated.'
-			]);
+			Responce::Send(202, 'User updated.');
 		}
 		else 
 		{
-			header("HTTP/1.0 400 Bad Reqest");
-
-			echo json_encode([
-				'errors' => 1,
-				'message' => 'User not updated. Error in db query.'
-			]);
+			Responce::Send(400, 'User not updated. Error in db query.');
 		}
 	}
 
